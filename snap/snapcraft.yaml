@@ -1,6 +1,6 @@
 name: lutris
 confinement: strict
-base: core18
+base: core22
 grade: stable
 adopt-info: lutris
 
@@ -36,10 +36,8 @@ parts:
     plugin: nil
     override-build: |
       snapcraftctl build
-      if [ "$SNAPCRAFT_ARCH_TRIPLET" = "x86_64-linux-gnu" ]; then
-        dpkg --add-architecture i386
-        apt update
-      fi
+      dpkg --add-architecture i386
+      apt update
 
   gnome-extension-hack:
     plugin: dump
@@ -64,7 +62,6 @@ parts:
   lutris:
     after: [enable-i386]
     plugin: python
-    python-version: python3
     source: .
     parse-info: [share/metainfo/net.lutris.Lutris.metainfo.xml]
     override-pull: |
@@ -83,6 +80,10 @@ parts:
   lutris-runtime:
     after: [enable-i386]
     plugin: nil
+    override-pull: |
+      snapcraftctl pull
+      dpkg --add-architecture i386
+      apt update
     stage-packages:
       - cabextract
       - curl
@@ -90,7 +91,6 @@ parts:
       - gir1.2-glib-2.0
       - gir1.2-gnomedesktop-3.0
       - gir1.2-gtk-3.0
-      - gir1.2-webkit2-4.1
       - libgnutls30
       - libvulkan1
       - libxrandr2
@@ -109,16 +109,16 @@ parts:
       - x11-xserver-utils
       - xterm
       - xz-utils
-      - on amd64:
-          - lib32gcc1
-          - libc6-i386
-          - libglu1-mesa:i386
-          - libglvnd0:i386
-          - libglx-mesa0:i386
-          - libgnutls30:i386
-          - libvulkan1:i386
-          - libx11-6:i386
-          - x11-xserver-utils:i386
+      #32 bit 
+      - lib32gcc1
+      - libc6-i386
+      - libglu1-mesa:i386
+      - libglvnd0:i386
+      - libglx-mesa0:i386
+      - libgnutls30:i386
+      - libvulkan1:i386
+      - libx11-6:i386
+      - x11-xserver-utils:i386
     stage:
       - -lib/ld-linux.so.2
       - -usr/bin/cpp-7
@@ -155,7 +155,7 @@ environment:
 apps:
   lutris:
     command: bin/gnome-extension-hack $SNAP/usr/bin/python3 $SNAP/bin/lutris -d
-    extensions: [gnome-3-28]
+    extensions: [gnome]
     desktop: share/applications/net.lutris.Lutris.desktop
     common-id: net.lutris.Lutris
     plugs:
