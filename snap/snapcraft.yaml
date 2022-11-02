@@ -130,7 +130,7 @@ parts:
       - xterm
       - xz-utils
       #32 bit 
-      #- lib32gcc1
+      - lib32gcc-s1
       - libc6-i386
       - libglu1-mesa:i386
       - libglvnd0:i386
