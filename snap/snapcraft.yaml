@@ -8,34 +8,6 @@ summary: Lutris desktop client in Python / PyGObject
 description: |
   Lutris helps you install and play video games from all eras and from most gaming systems. By leveraging and combining existing emulators, engine re-implementations and compatibility layers, it gives you a central interface to launch all your games. The client can connect with existing services like Humble Bundle, GOG and Steam to make your game libraries easily available. Game downloads and installations are automated and can be modified through user made scripts.
   
-apps:
-  lutris:
-    command: lutris
-    plugs:
-      - audio-playback
-      - browser-support
-      - daemon-notify
-      - desktop
-      - desktop-legacy
-      - gsettings
-      - hardware-observe
-      - home
-      - io-ports-control
-      - joystick
-      - kvm
-      - libvirt
-      - mount-observe
-      - network
-      - network-bind
-      - network-manager
-      - opengl
-      - pulseaudio
-      - removable-media
-      - screen-inhibit-control
-      - unity7
-      - wayland
-      - x11
-
 package-repositories:
   - type: apt
     url: http://archive.ubuntu.com/ubuntu/
@@ -71,6 +43,25 @@ parts:
       snapcraftctl build
       dpkg --add-architecture i386
       apt update
+      
+  gnome-extension-hack:
+    plugin: dump
+    source: .
+    override-pull: |
+      cat <<'EOF' > gnome-extension-hack
+      #!/bin/sh
+      rm -f "$XDG_DATA_HOME/icons/hicolor/"* || true
+      if [ "$SNAP_ARCH" = "amd64" ]; then
+        export LD_LIBRARY_PATH="$SNAP/usr/lib/i386-linux-gnu:$SNAP/lib/i386-linux-gnu:$LD_LIBRARY_PATH"
+        export LIBGL_DRIVERS_PATH="$LIBGL_DRIVERS_PATH:$SNAP/usr/lib/i386-linux-gnu/dri"
+        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIBGL_DRIVERS_PATH"
+        export LIBVA_DRIVERS_PATH="$SNAP/usr/lib/i386-linux-gnu/dri"
+      fi
+      exec "$@"
+      EOF
+      chmod +x gnome-extension-hack
+    organize:
+      gnome-extension-hack: bin/gnome-extension-hack
 
   lutris:
     after: [enable-i386]
@@ -86,16 +77,13 @@ parts:
       - python3-setproctitle
       - python3-yaml
       - python3-setuptools
+      - python3-distro
       - libpython3-dev
       - python3-pip
       - libcairo2-dev
     override-build: |
       snapcraftctl build
-      python3 setup.py install
-  
-  lutris-runtime:
-    after: [enable-i386]
-    plugin: nil
+      python3 setup.py build
     stage-packages:
       - cabextract
       - curl
@@ -116,12 +104,15 @@ parts:
       - python3-requests
       - python3-setproctitle
       - python3-yaml
+      - python3-distro
       - unzip
       - wine
       - x11-xserver-utils
       - xterm
       - xz-utils
-      - python-gdbm
+      - libcairo2-dev
+      - libxt-dev
+      - libgirepository1.0-dev
       #32 bit 
       - lib32gcc-s1
       - libc6-i386
@@ -140,9 +131,40 @@ parts:
       - -usr/share/doc/cpp/README.Debian
       - -usr/share/man/man1/cpp-7.1.gz
 
+environment:
+  HOME: $SNAP_USER_COMMON
+  
 layout:
   /etc/ld.so.cache:
     bind-file: $SNAP_DATA/etc/ld.so.cache
+
+apps:
+  lutris:
+    command: bin/gnome-extension-hack python3 lutris
+    plugs:
+      - audio-playback
+      - browser-support
+      - daemon-notify
+      - desktop
+      - desktop-legacy
+      - gsettings
+      - hardware-observe
+      - home
+      - io-ports-control
+      - joystick
+      - kvm
+      - libvirt
+      - mount-observe
+      - network
+      - network-bind
+      - network-manager
+      - opengl
+      - pulseaudio
+      - removable-media
+      - screen-inhibit-control
+      - unity7
+      - wayland
+      - x11
 
   # wine:
   #   extensions: [gnome-3-28]
