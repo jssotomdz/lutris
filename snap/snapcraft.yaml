@@ -8,6 +8,26 @@ architectures:
   - build-on: amd64
   - build-on: i386
 
+package-repositories:
+  - type: apt
+    url: http://archive.ubuntu.com/ubuntu/
+    suites: [jammy]
+    components: [main, universe]
+    architectures: [amd64, i386]
+    key-id: F6ECB3762474EDA9D21B7022871920D1991BC93C
+    key-server: keyserver.ubuntu.com
+
+  - type: apt
+    url: http://ppa.launchpad.net/oibaf/graphics-drivers/ubuntu
+    suites: [jammy]
+    components: [main]
+    architectures: [amd64, i386]
+    key-id: 5ABCE68FF4633EA42E219156957D2708A03A4626
+    key-server: keyserver.ubuntu.com
+ #   - type: apt
+ #     deb-types: [deb]
+ #     components: [main]
+
 # package-repositories:
 #   - type: apt
 #     deb-types: [deb]
@@ -110,7 +130,7 @@ parts:
       - xterm
       - xz-utils
       #32 bit 
-      - lib32gcc1
+      #- lib32gcc1
       - libc6-i386
       - libglu1-mesa:i386
       - libglvnd0:i386
@@ -118,7 +138,7 @@ parts:
       - libgnutls30:i386
       - libvulkan1:i386
       - libx11-6:i386
-      - x11-xserver-utils:i386
+      #- x11-xserver-utils:i386
     stage:
       - -lib/ld-linux.so.2
       - -usr/bin/cpp-7
